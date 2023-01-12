@@ -13,3 +13,58 @@
  
  ## Code Example
  */
+
+
+public class User: Copying {
+  public var name: String
+
+  init(name: String) {
+    self.name = name
+  }
+
+  public required convenience init(_ prototype: User) {
+    self.init(name: prototype.name)
+  }
+}
+
+var array1 = [User(name: "Interesting subject")]
+// The assignment uses shallow copy
+var array2 = array1
+
+array1[0].name = "The name has changed!"
+print(array2[0].name) // Outputs `The name has changed!`
+
+public protocol Copying: AnyObject {
+  init(_ prototype: Self)
+}
+
+extension Copying {
+  public func copy() -> Self {
+    return type(of: self).init(self)
+  }
+}
+
+
+public final class LastnameUser: User {
+  public var lastname: String
+
+  public init(name: String, lastname: String) {
+    self.lastname = lastname
+    super.init(name: name)
+  }
+
+  @available(*, unavailable) // Ensures the method is not called directly
+  public required convenience init(_ prototype: User) {
+    guard let prototype = prototype as? LastnameUser else {
+      fatalError("Wrong prototype type")
+    }
+    self.init(name: prototype.name, lastname: prototype.lastname)
+  }
+}
+
+var array3 = array2.map { $0.copy() }
+array1[0].name = "The name has changed again!"
+
+print("Value in array 1: \(array1[0].name)" ) // Outputs `The name has changed again!`
+print("Value in array 2: \(array2[0].name)" ) // Outputs `The name has changed again!`
+print("Value in array 3: \(array3[0].name)" ) // Outputs `The name has changed!`
