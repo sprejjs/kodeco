@@ -28,7 +28,7 @@
 
 import UIKit
 
-public class LineShape: CAShapeLayer {
+public class LineShape: CAShapeLayer, Copying {
 
   // MARK: - Instance Properties
   private let bezierPath: UIBezierPath
@@ -45,12 +45,17 @@ public class LineShape: CAShapeLayer {
     strokeColor = color.cgColor
   }
 
-  public override init(layer: Any) {
-    let prototype = layer as! LineShape
+  public override convenience init(layer: Any) {
+    guard let layer = layer as? LineShape else {
+      fatalError("LineShape can only be copied from another LineShape")
+    }
+    self.init(layer)
+  }
+
+  public required init(_ prototype: LineShape) {
     bezierPath = prototype.bezierPath.copy() as! UIBezierPath
     super.init(layer: prototype)
-
-    fillColor = nil
+    fillColor = prototype.fillColor
     lineWidth = prototype.lineWidth
     path = bezierPath.cgPath
     strokeColor = prototype.strokeColor

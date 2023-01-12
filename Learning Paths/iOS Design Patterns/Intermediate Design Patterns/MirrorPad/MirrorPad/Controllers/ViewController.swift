@@ -38,6 +38,11 @@ public class ViewController: UIViewController {
   // MARK: - Actions
   @IBAction public func animatePressed(_ sender: Any) {
     inputDrawView.animate()
+
+    mirrorDrawViews.forEach {
+      $0.copyLines(from: inputDrawView)
+      $0.animate()
+    }
   }
 
   @IBAction public func clearPressed(_ sender: Any) {
@@ -51,6 +56,6 @@ public class ViewController: UIViewController {
   
   // MARK: - View Lifecycle
   public override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-    return .top
+    .top
   }
 }

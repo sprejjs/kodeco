@@ -44,6 +44,11 @@ extension Copying {
   }
 }
 
+extension Sequence where Element: Copying {
+  public func deepCopy() -> [Element] {
+    map { $0.copy() }
+  }
+}
 
 public final class LastnameUser: User {
   public var lastname: String
@@ -62,7 +67,7 @@ public final class LastnameUser: User {
   }
 }
 
-var array3 = array2.map { $0.copy() }
+var array3 = array2.deepCopy()
 array1[0].name = "The name has changed again!"
 
 print("Value in array 1: \(array1[0].name)" ) // Outputs `The name has changed again!`
