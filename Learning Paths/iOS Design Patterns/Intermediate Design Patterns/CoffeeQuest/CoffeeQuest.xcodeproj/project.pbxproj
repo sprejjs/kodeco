@@ -17,6 +17,7 @@
 		C38756A0E9013F2F1E6253E0 /* Pods_CoffeeQuest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = C7C9278042C96775D875EE9F /* Pods_CoffeeQuest.framework */; };
 		D5D960D5D83FF0FD2F05D34B /* BusinessSearchClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96AE4BB8D096D9E9EC988 /* BusinessSearchClient.swift */; };
 		D5D96357275B36CF4277BC64 /* Business.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D966A255FF755E1CBA5EFB /* Business.swift */; };
+		D5D96AE9C5A41738AAE201F3 /* Filter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96D28E405F9366EF27113 /* Filter.swift */; };
 		D5D96D0BE1F418CFCB217BE4 /* AnnotationFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96CAA3075B77A5F57132A /* AnnotationFactory.swift */; };
 		D5D96FF338463AFB332154DD /* YLPClient+BusinessSearchClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = D5D96229321B69DF309AE9B5 /* YLPClient+BusinessSearchClient.swift */; };
 /* End PBXBuildFile section */
@@ -38,6 +39,7 @@
 		D5D966A255FF755E1CBA5EFB /* Business.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Business.swift; sourceTree = "<group>"; };
 		D5D96AE4BB8D096D9E9EC988 /* BusinessSearchClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BusinessSearchClient.swift; sourceTree = "<group>"; };
 		D5D96CAA3075B77A5F57132A /* AnnotationFactory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AnnotationFactory.swift; sourceTree = "<group>"; };
+		D5D96D28E405F9366EF27113 /* Filter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Filter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 			isa = PBXGroup;
 			children = (
 				D5D966A255FF755E1CBA5EFB /* Business.swift */,
+				D5D96D28E405F9366EF27113 /* Filter.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -301,6 +304,7 @@
 				D5D96357275B36CF4277BC64 /* Business.swift in Sources */,
 				D5D960D5D83FF0FD2F05D34B /* BusinessSearchClient.swift in Sources */,
 				D5D96FF338463AFB332154DD /* YLPClient+BusinessSearchClient.swift in Sources */,
+				D5D96AE9C5A41738AAE201F3 /* Filter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
