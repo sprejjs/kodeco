@@ -13,3 +13,52 @@
  
  ## Code Example
  */
+
+import UIKit
+
+// MARK: - Delegate Protocol
+public protocol EmergencyResponding {
+  func notifyFire(at location: String)
+  func notifyCarCrash(at location: String)
+}
+
+// MARK: - Delegates
+public class FireStation: EmergencyResponding {
+  public func notifyFire(at location: String) {
+    print("Fire Station: Fire at \(location)!")
+  }
+
+  public func notifyCarCrash(at location: String) {
+    print("Fire Station: Car crash at \(location)!")
+  }
+}
+
+public class PoliceStation: EmergencyResponding {
+  public func notifyFire(at location: String) {
+    print("Police Station: Fire at \(location)!")
+  }
+
+  public func notifyCarCrash(at location: String) {
+    print("Police Station: Car crash at \(location)!")
+  }
+}
+
+// MARK: - Delegating Object
+public class DispatchSystem {
+  let multicastDelegate = MulticastDelegate<EmergencyResponding>()
+}
+
+// MARK: - Example
+let dispatchSystem = DispatchSystem()
+var fireStation: FireStation! = FireStation()
+var policeStation = PoliceStation()
+
+dispatchSystem.multicastDelegate.addDelegate(fireStation)
+dispatchSystem.multicastDelegate.addDelegate(policeStation)
+
+dispatchSystem.multicastDelegate.invokeDelegates { $0.notifyFire(at: "123 Main St.") }
+
+print("")
+
+fireStation = nil
+dispatchSystem.multicastDelegate.invokeDelegates { $0.notifyCarCrash(at: "123 Main St.") }
