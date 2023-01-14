@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="17156" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="21507" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES" initialViewController="BYZ-38-t0r">
     <device id="retina4_7" orientation="portrait" appearance="light"/>
     <dependencies>
         <deployment identifier="iOS"/>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="17125"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="21505"/>
         <capability name="Safe area layout guides" minToolsVersion="9.0"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
@@ -20,7 +20,7 @@
                                 <rect key="frame" x="0.0" y="0.0" width="375" height="607"/>
                             </imageView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="BPl-Gt-kbq">
-                                <rect key="frame" x="36.5" y="246" width="302.5" height="115"/>
+                                <rect key="frame" x="27" y="246" width="321.5" height="115"/>
                                 <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                 <string key="text">What do you call a yeti with a six pack?
 
@@ -70,7 +70,7 @@ An abdominal snowman</string>
                             <constraint firstItem="WVj-ly-l5z" firstAttribute="top" secondItem="8bC-Xf-vdC" secondAttribute="top" id="PoU-YY-kR9"/>
                             <constraint firstItem="BMS-Vl-B4D" firstAttribute="bottom" secondItem="tme-zb-5GN" secondAttribute="bottom" id="Qc4-XT-g9e"/>
                             <constraint firstItem="tme-zb-5GN" firstAttribute="top" secondItem="WVj-ly-l5z" secondAttribute="bottom" constant="16" id="RKD-YI-Ta2"/>
-                            <constraint firstAttribute="bottom" secondItem="tme-zb-5GN" secondAttribute="bottom" constant="16" id="We7-WG-c40"/>
+                            <constraint firstAttribute="bottomMargin" secondItem="tme-zb-5GN" secondAttribute="bottom" constant="16" id="We7-WG-c40"/>
                             <constraint firstItem="BPl-Gt-kbq" firstAttribute="centerY" secondItem="WVj-ly-l5z" secondAttribute="centerY" id="YJR-hl-f8j"/>
                             <constraint firstItem="WVj-ly-l5z" firstAttribute="leading" secondItem="6Tk-OE-BBY" secondAttribute="leading" id="cOW-0V-esY"/>
                             <constraint firstItem="BMS-Vl-B4D" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="tme-zb-5GN" secondAttribute="trailing" constant="8" id="krd-hJ-Hr6"/>
