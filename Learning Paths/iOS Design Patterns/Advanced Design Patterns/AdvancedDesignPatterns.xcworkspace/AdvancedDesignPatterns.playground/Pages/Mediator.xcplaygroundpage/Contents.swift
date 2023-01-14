@@ -18,3 +18,64 @@
  ## Code Example
  */
 
+// MARK - Colleague Protocol
+public protocol Colleague: AnyObject {
+  func colleague(_ colleague: Colleague?, didReceive message: String)
+}
+
+// MARK - Mediator Protocol
+public protocol MediatorProtocol: AnyObject {
+  func addColleague(_ colleague: Colleague)
+  func send(message: String, from colleague: Colleague)
+}
+
+// MARK: - Colleague
+
+public class Musketeer {
+  public let name: String
+  public weak var mediator: MediatorProtocol?
+
+  public init(name: String, mediator: MediatorProtocol) {
+    self.name = name
+    self.mediator = mediator
+    mediator.addColleague(self)
+  }
+
+  public func sendMessage(_ message: String) {
+    print("\(name) sends: \(message)")
+    mediator?.send(message: message, from: self)
+  }
+}
+
+extension Musketeer: Colleague {
+  public func colleague(_ colleague: Colleague?, didReceive message: String) {
+    print("\(name) received: \(message)")
+  }
+}
+
+// MARK: - Mediator
+public class MusketeerMediator: Mediator<Colleague> {
+}
+
+extension MusketeerMediator: MediatorProtocol {
+  public func addColleague(_ colleague: Colleague) {
+    addColleague(colleague, strongReference: true)
+  }
+
+  public func send(message: String, from colleague: Colleague) {
+    invokeColleagues(by: colleague) {
+      $0.colleague(colleague, didReceive: message)
+    }
+  }
+}
+
+// MARK: - Usage Example
+let mediator = MusketeerMediator()
+
+let aramis = Musketeer(name: "Aramis", mediator: mediator)
+let athos = Musketeer(name: "Athos", mediator: mediator)
+let porthos = Musketeer(name: "Porthos", mediator: mediator)
+
+aramis.sendMessage("All for one, and one for all!")
+
+mediator.invokeColleagues { $0.colleague(nil, didReceive: "Charge!") }
