@@ -1,4 +1,4 @@
-/// Copyright (c) 2018 Razeware LLC
+/// Copyright (c) 2019 Razeware LLC
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
 /// of this software and associated documentation files (the "Software"), to deal
@@ -28,45 +28,14 @@
 
 import UIKit
 
-public class ViewController: UIViewController {
+public class ImageRenderer {
 
-  // MARK: - Outlets
-  @IBOutlet public var drawViewContainer: UIView!
-  @IBOutlet public var inputDrawView: DrawView!
-  @IBOutlet public var mirrorDrawViews: [DrawView]!
-
-  // MARK: - Properties
-  public lazy var shareFacade: ShareFacade = ShareFacade(
-      entireDrawing: drawViewContainer,
-      inputDrawing: inputDrawView,
-      parentViewController: self)
-
-  // MARK: - Actions
-  @IBAction public func animatePressed(_ sender: Any) {
-    inputDrawView.animate()
-
-    mirrorDrawViews.forEach {
-      $0.copyLines(from: inputDrawView)
-      $0.animate()
-    }
-  }
-
-  @IBAction public func clearPressed(_ sender: Any) {
-    inputDrawView.clear()
-    mirrorDrawViews.forEach { $0.clear() }
-  }
-
-  @IBAction public func sharePressed(_ sender: Any) {
-    shareFacade.presentShareController()
-  }
-  
-  // MARK: - View Lifecycle
-  public override var preferredScreenEdgesDeferringSystemGestures: UIRectEdge {
-    .top
-  }
-
-  public override func viewDidLoad() {
-    super.viewDidLoad()
-    mirrorDrawViews.forEach(inputDrawView.addDelegate)
+  public func convertViewToImage(_ view: UIView) -> UIImage {
+    UIGraphicsBeginImageContextWithOptions(view.bounds.size, view.isOpaque, 0.0)
+    let context = UIGraphicsGetCurrentContext()!
+    view.layer.render(in: context)
+    let image = UIGraphicsGetImageFromCurrentImageContext()!
+    UIGraphicsEndImageContext()
+    return image
   }
 }
