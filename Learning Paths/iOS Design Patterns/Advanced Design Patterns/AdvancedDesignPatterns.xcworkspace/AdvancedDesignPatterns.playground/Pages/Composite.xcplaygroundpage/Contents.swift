@@ -13,3 +13,53 @@
  
  ## Code Example
  */
+
+ import Foundation
+
+ public protocol File {
+  var name: String { get }
+  func open()
+ }
+
+ struct eBook: File {
+  var name: String
+  var author: String
+
+  func open() {
+    print("Opening \(name) book by \(author).")
+  }
+ }
+
+ struct Music: File {
+  var name: String
+  var artist: String
+
+  func open() {
+    print("Opening \(name) song by \(artist).")
+  }
+ }
+
+ struct Folder: File {
+  var name: String
+  var files: [File]
+
+  mutating func addFile(_ file: File) {
+    files.append(file)
+  }
+
+  func open() {
+    print("Displaying files in \(name) folder:")
+    files.forEach { print("- \($0.name)") }
+  }
+ }
+
+ // Mark: - Usage
+ let psychoKiller = Music(name: "Psycho Killer", artist: "Talking Heads")
+ let killingStrangers = Music(name: "Killing Strangers", artist: "Marylin Manson")
+ let theHungerGames = eBook(name: "The Hunger Games", author: "Suzanne Collins")
+
+ var documents = Folder(name: "Documents", files: [theHungerGames])
+ let music = Folder(name: "Music", files: [psychoKiller, killingStrangers])
+ documents.addFile(music)
+
+ documents.open()
