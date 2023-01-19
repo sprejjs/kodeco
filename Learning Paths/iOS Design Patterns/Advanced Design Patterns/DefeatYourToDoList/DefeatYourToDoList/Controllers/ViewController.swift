@@ -36,7 +36,7 @@ class ViewController: UIViewController {
   @IBOutlet var warriorImageView: UIImageView!
 
   // MARK: - Properties
-  var toDos: [ToDoItem] = []
+  var toDos: [ToDo] = []
 
   // MARK: - View Life Cycle
   override func viewDidLoad() {
@@ -59,8 +59,11 @@ extension ViewController {
                                        message: "What kind of task would you like to create?",
                                        preferredStyle: .alert)
     controller.addAction(UIAlertAction(title: "Single Task", style: .default) { [unowned self] _ in
-      self.createDefaultTask()
-    })    
+      createDefaultTask()
+    })
+    controller.addAction(UIAlertAction(title: "Multistep Task", style: .default) { [unowned self] _ in
+      createMultistepToDoItem()
+    })
     controller.addAction(UIAlertAction(title: "Cancel", style: .default))
     present(controller, animated: true)
   }
@@ -80,6 +83,36 @@ extension ViewController {
         self.toDos.append(currentToDo)
         self.collectionView.reloadData()
         self.updateWarriorPosition()
+    }
+    controller.addAction(saveAction)
+    controller.addAction(UIAlertAction(title: "Cancel", style: .default))
+    present(controller, animated: true)
+  }
+
+  func createMultistepToDoItem() {
+    let controller = UIAlertController(title: "Create Multistep Task",
+                                       message: "",
+                                       preferredStyle: .alert)
+
+    controller.addTextField { $0.placeholder = "Title" }
+    (1...4).forEach { _ in
+      controller.addTextField { $0.placeholder = "Subtask title" }
+    }
+
+    let saveAction = UIAlertAction(title: "Save", style: .default) { [unowned self] _ in
+      guard
+        let textFields = controller.textFields,
+        let name = textFields.first?.text,
+        !name.isEmpty
+      else {
+        return
+      }
+
+      let subtasks: [ToDoItem] = textFields[1...].compactMap { $0.text }.filter { !$0.isEmpty }.map { ToDoItem(name: $0) }
+      toDos.append(MultistepToDoItem(name: name, subtasks: subtasks))
+
+      collectionView.reloadData()
+      updateWarriorPosition()
     }
     controller.addAction(saveAction)
     controller.addAction(UIAlertAction(title: "Cancel", style: .default))
@@ -105,7 +138,7 @@ extension ViewController {
 extension ViewController: UICollectionViewDataSource {
   
   func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-    return toDos.count
+    toDos.count
   }
   
   func collectionView(_ collectionView: UICollectionView,
@@ -116,6 +149,7 @@ extension ViewController: UICollectionViewDataSource {
     cell.label.text = currentToDo.name
     cell.checkBoxView.backgroundColor = currentToDo.isComplete ?
       UIColor(red: 0.24, green: 0.56, blue: 0.30, alpha: 1.0) : .white
+    cell.subtasks = currentToDo.subtasks
     cell.layoutSubviews()
     return cell
   }
@@ -125,7 +159,7 @@ extension ViewController: UICollectionViewDataSource {
 extension ViewController: UICollectionViewDelegate {
 
   func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-    let toDo = toDos[indexPath.row]
+    var toDo = toDos[indexPath.row]
     toDo.isComplete = !toDo.isComplete
     
     let cell = collectionView.cellForItem(at: indexPath) as! ToDoCell
@@ -145,6 +179,7 @@ extension ViewController: UICollectionViewDelegateFlowLayout {
     var size = CGSize()
     size.width = collectionView.frame.width
     size.height = collectionView.frame.height * 0.15
+    size.height += CGFloat(toDos[indexPath.row].subtasks.count) * 60
     return size
   }
 }

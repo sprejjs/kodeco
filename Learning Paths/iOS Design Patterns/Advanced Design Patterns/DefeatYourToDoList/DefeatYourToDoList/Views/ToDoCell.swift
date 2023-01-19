@@ -41,7 +41,7 @@ public class ToDoCell: UICollectionViewCell {
 
   // MARK: - Properties
   weak var delegate: ToDoCellDelegate?
-  var subtasks: [ToDoItem]?
+  var subtasks: [ToDo]?
 
   public override func layoutSubviews() {
     checkBoxView.layer.borderWidth = 1
@@ -86,7 +86,7 @@ extension ToDoCell: UICollectionViewDelegate {
 
   public func collectionView(_ collectionView: UICollectionView,
                              didSelectItemAt indexPath: IndexPath) {
-    let toDo = subtasks![indexPath.row]
+    var toDo = subtasks![indexPath.row]
     toDo.isComplete = !toDo.isComplete
     collectionView.reloadData()
     delegate?.toDoCellDidUpdateSubtask(self)
