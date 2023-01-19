@@ -71,3 +71,100 @@ public class Quarter: Coin {
   public override class var standardWeight: Double { return 5.670 }
   public override var centValue: Int { return 25 }
 }
+
+// MARK: - Handler Protocol
+public protocol CoinHandlerProtocol {
+  var nextHandler: CoinHandlerProtocol? { get }
+  func handle(_ coin: Coin) -> Coin?
+}
+
+// MARK: - Concrete Handlers
+public class CoinHandler {
+  public var nextHandler: CoinHandlerProtocol?
+  public let coinType: Coin.Type
+  public let diameterRange: ClosedRange<Double>
+  public let weightRange: ClosedRange<Double>
+
+  public init(coinType: Coin.Type,
+              diameterVariation: Double = 0.05,
+              weightVariation: Double = 0.05) {
+    self.coinType = coinType
+    let standardDiameter = coinType.standardDiameter
+    self.diameterRange = standardDiameter * (1 - diameterVariation)...standardDiameter * (1 + diameterVariation)
+    self.weightRange = coinType.standardWeight * (1 - weightVariation)...coinType.standardWeight * (1 + weightVariation)
+  }
+}
+
+extension CoinHandler: CoinHandlerProtocol {
+  public func handle(_ coin: Coin) -> Coin? {
+    if let coin = createCoin(coin) {
+      return coin
+    }
+
+    return nextHandler?.handle(coin)
+  }
+
+  private func createCoin(_ unknownCoin: Coin) -> Coin? {
+    print("Attempting to create \(coinType)...")
+    guard diameterRange.contains(unknownCoin.diameter) else {
+      print("Failed: diameter out of range")
+      return nil
+    }
+    guard weightRange.contains(unknownCoin.weight) else {
+      print("Failed: weight out of range")
+      return nil
+    }
+    let coin = coinType.init(diameter: unknownCoin.diameter, weight: unknownCoin.weight)
+    print("Success: \(coin)")
+    return coin
+  }
+}
+
+// MARK: - Client
+public class VendingMachine {
+  public let coinHandler: CoinHandler
+  public var coins: [Coin] = []
+
+  public init(coinHandler: CoinHandler) {
+    self.coinHandler = coinHandler
+  }
+
+  public func insertCoin(_ coin: Coin) {
+    guard let coin = coinHandler.handle(coin) else {
+      print("Coin rejected: \(coin)")
+      return
+    }
+    print("Coin accepted: \(coin)")
+
+    print("")
+    coins.append(coin)
+    let dollarValue = coins.reduce(0) { $0 + $1.dollarValue }
+    print("Total value: $\(dollarValue)")
+
+    print("")
+    let weight = coins.reduce(0) { $0 + $1.weight }
+    print("Total weight: \(weight)")
+    print("")
+  }
+}
+
+// MARK: - Usage
+let pennyHandler = CoinHandler(coinType: Penny.self)
+let nickelHandler = CoinHandler(coinType: Nickel.self)
+let dimeHandler = CoinHandler(coinType: Dime.self)
+let quarterHandler = CoinHandler(coinType: Quarter.self)
+
+pennyHandler.nextHandler = nickelHandler
+nickelHandler.nextHandler = dimeHandler
+dimeHandler.nextHandler = quarterHandler
+
+let vendingMachine = VendingMachine(coinHandler: pennyHandler)
+
+let penny = Penny()
+vendingMachine.insertCoin(penny)
+
+let quarter = Quarter()
+vendingMachine.insertCoin(quarter)
+
+let invalidDime = Dime(diameter: 7.91, weight: 2.268)
+vendingMachine.insertCoin(invalidDime)
