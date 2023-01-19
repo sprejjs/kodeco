@@ -42,6 +42,8 @@ public class PasswordClient {
   private let keychain = KeychainWrapper.standard
   private let passwordKey = "passwords"
 
+  private var decryptionHandler: DecryptionHandlerProtocol?
+
   // MARK: - Object Lifecycle
   public init() {
     passwords = keychain.object(forKey: passwordKey) as? [String] ?? []
@@ -49,7 +51,21 @@ public class PasswordClient {
   }
 
   private func setupDecryptionHandler() {
-    // TODO: - Write this
+    guard let firstPassword = passwords.first else {
+      decryptionHandler = nil
+      return
+    }
+
+    var current = DecryptionHandler(password: firstPassword)
+    decryptionHandler = current
+
+    passwords.forEach { password in
+      if password != firstPassword {
+        let next = DecryptionHandler(password: password)
+        current.next = next
+        current = next
+      }
+    }
   }
 
   // MARK: - Password Management
@@ -84,7 +100,11 @@ public class PasswordClient {
 
   // MARK: - Decrypt
   public func decrypt(_ base64EncodedString: String) -> String? {
-    // TODO: - Write this
-    return nil
+    guard
+      let data = Data(base64Encoded: base64EncodedString),
+      let value = decryptionHandler?.decrypt(data: data)
+    else { return nil }
+
+    return value
   }
 }
