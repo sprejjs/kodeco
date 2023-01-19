@@ -31,7 +31,6 @@ public class PlayerInputState: GameState {
   // MARK: - Instance Properties
   public let actionTitle: String
   public let player: Player
-
   // MARK: - Object Lifecycle
   public init(gameMode: GameManager, player: Player, actionTitle: String) {
     self.actionTitle = actionTitle
@@ -48,11 +47,17 @@ public class PlayerInputState: GameState {
   }
 
   public override func addMove(at position: GameboardPosition) {
-    // TODO: - Add move for player
+    let moveCount = movesForPlayer[player]?.count ?? 0
+    guard moveCount < turnsPerPlayer else { return }
+
+    displayMarkView(at: position, turnNumber: moveCount + 1)
+    enqueueMoveCommand(at: position)
+    updateMoveCountLabel()
   }
 
   private func enqueueMoveCommand(at position: GameboardPosition) {
-    // TODO: - Enqueue the command to be performed later
+    let move = MoveCommand(gameboard: gameboard, player: player, position: position, gameboardView: gameboardView)
+    movesForPlayer[player]?.append(move)
   }
 
   private func displayMarkView(at position: GameboardPosition, turnNumber: Int) {
@@ -70,15 +75,29 @@ public class PlayerInputState: GameState {
   }
 
   private func updateMoveCountLabel() {
-    // TODO: - Show remaining moves left
+    let moveCount = movesForPlayer[player]?.count ?? 0
+    gameplayView.moveCountLabel.text = "\(moveCount)/\(turnsPerPlayer)"
   }
 
   public override func handleActionPressed() {
-    // TODO: - Handle action pressed
+    guard movesForPlayer[player]?.count == turnsPerPlayer else { return }
+    gameManager.transitionToNextState()
   }
 
   public override func handleUndoPressed() {
-    // TODO: - Handle undo pressed
+    guard
+      var moves = movesForPlayer[player],
+      let position = moves.popLast()?.position
+    else { return }
+
+    movesForPlayer[player] = moves
+    updateMoveCountLabel()
+
+    let markView = gameplayView.gameboardView.markViewForPosition[position]
+    markView?.turnNumbers.removeLast()
+
+    guard markView?.turnNumbers.isEmpty == true else { return }
+    gameboardView.removeMarkView(at: position, animated: false)
   }
 }
 

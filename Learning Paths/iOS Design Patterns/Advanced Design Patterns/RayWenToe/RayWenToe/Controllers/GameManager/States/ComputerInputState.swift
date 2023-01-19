@@ -53,7 +53,10 @@ public class ComputerInputState: GameState {
     }
     positions = random.arrayByShufflingObjects(in: positions) as! [GameboardPosition]
 
-    // TODO: - Add moves for generated positions
+    movesForPlayer[player] = positions.map { position in
+      MoveCommand(gameboard: gameboard, player: player, position: position, gameboardView: gameboardView)
+    }
+    gameManager.transitionToNextState()
   }
 
   private func generateRandomWinningCombination() -> [GameboardPosition] {
