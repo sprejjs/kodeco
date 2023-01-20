@@ -166,5 +166,5 @@ vendingMachine.insertCoin(penny)
 let quarter = Quarter()
 vendingMachine.insertCoin(quarter)
 
-let invalidDime = Dime(diameter: 7.91, weight: 2.268)
-vendingMachine.insertCoin(invalidDime)
+
+

@@ -30,3 +30,45 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
+import UIKit
+
+public class HowToCodeCoordinator {
+  public var children: [Coordinator] = []
+  public let router: Router
+
+  private lazy var stepViewControllers = [
+    StepViewController.instantiate(delegate: self, buttonColor: .systemRed, text: "Step 1", title: "Step 1"),
+    StepViewController.instantiate(delegate: self, buttonColor: .systemBlue, text: "Step 2", title: "Step 2"),
+    StepViewController.instantiate(delegate: self, buttonColor: .systemGreen, text: "Step 3", title: "Step 3"),
+    StepViewController.instantiate(delegate: self, buttonColor: .systemOrange, text: "Step 4", title: "Step 4"),
+  ]
+
+  private lazy var startOverviewController = StartOverViewController.instantiate(delegate: self)
+
+  public init(router: Router) {
+    self.router = router
+  }
+}
+
+extension HowToCodeCoordinator: Coordinator {
+  public func present(animated: Bool, onDismissed: (() -> Void)?) {
+    router.present(stepViewControllers[0], animated: animated, completion: onDismissed)
+  }
+}
+
+extension HowToCodeCoordinator: StepViewControllerDelegate {
+  public func stepViewControllerDidPressNext(_ stepViewController: StepViewController) {
+    guard let index = stepViewControllers.firstIndex(of: stepViewController) else { return }
+    if index == stepViewControllers.count - 1 {
+      router.present(startOverviewController, animated: true)
+    } else {
+      router.present(stepViewControllers[index + 1], animated: true)
+    }
+  }
+}
+
+extension HowToCodeCoordinator: StartOverViewControllerDelegate {
+  public func startOverViewControllerDidPressStartOver(_ startOverViewController: StartOverViewController) {
+    router.dismiss(animated: true)
+  }
+}
