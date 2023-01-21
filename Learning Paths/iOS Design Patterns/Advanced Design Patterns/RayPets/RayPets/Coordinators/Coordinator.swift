@@ -30,7 +30,7 @@
 /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 /// THE SOFTWARE.
 
-public protocol Coordinator: class {
+public protocol Coordinator: AnyObject {
 
   var children: [Coordinator] { get set }
   var router: Router { get }
@@ -43,6 +43,11 @@ public protocol Coordinator: class {
 }
 
 extension Coordinator {
+
+  public func present(animated: Bool = true,
+                      onDismissed: (() -> Void)? = nil) {
+    present(animated: animated, onDismissed: onDismissed)
+  }
 
   public func dismiss(animated: Bool) {
     router.dismiss(animated: true)
