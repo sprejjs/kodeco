@@ -2,3 +2,7 @@
 *xcuserdata
 *.idea
 APIKeys.swift
+
+## Playgrounds
+timeline.xctimeline
+playground.xcworkspace
