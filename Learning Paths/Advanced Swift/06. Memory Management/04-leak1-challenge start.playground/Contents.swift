@@ -36,6 +36,3 @@ do {
                                     richard,greg,
                                     darren].map { .init($0) })
 }
-
-
-
