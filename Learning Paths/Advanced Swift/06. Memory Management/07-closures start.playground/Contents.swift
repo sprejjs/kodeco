@@ -45,3 +45,13 @@ do {
     print(galileo.name)
   }
 }
+
+do {
+  let galileo = Supernova("Galileo")
+  DispatchQueue.global().asyncAfter(deadline: .now() + 0.1) { [unowned(unsafe) galileo] in // <- Here we are capturing the memory address of the variable without increasing the
+    // reference count
+    print(galileo) // <- This behaviour is undefined. It could either work if the variable is still in memory or it could do anything else depending on what's located at that address
+    galileo.explode()
+    print(galileo.name)
+  }
+}
