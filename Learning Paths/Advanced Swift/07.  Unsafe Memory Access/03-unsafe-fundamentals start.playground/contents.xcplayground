@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<playground version='6.0' target-platform='ios'>
+    <pages>
+        <page name='RawPointer'/>
+        <page name='TypedPointer'/>
+        <page name='ConvertRawToTyped'/>
+        <page name='Getting Bytes'/>
+        <page name='Binding'/>
+    </pages>
+</playground>
