@@ -59,6 +59,98 @@ example(of: "ignoreOutput()") {
     .store(in: &subscriptions)
 }
 
+example(of: "first()") {
+  var subject = PassthroughSubject<Int, Never>()
+
+  subject
+    .first { $0.isMultiple(of: 2) }
+    .sink(receiveCompletion: { _ in
+      print("Received completion event")
+    }, receiveValue: {
+      print($0) // <- Outputs 2
+    })
+    .store(in: &subscriptions)
+
+  print("Sending 1")
+  subject.send(1)
+  print("Sending 2")
+  subject.send(2)
+  print("Sending 4")
+  subject.send(4) // <- The completion event is sent, so the subscription is already
+  // cancelled, this value will never be received.
+}
+
+example(of: "last()") {
+  var subject = PassthroughSubject<Int, Never>()
+
+  subject
+    .last { $0.isMultiple(of: 2) }
+    .sink(receiveCompletion: { _ in
+      print("Received completion event")
+    }, receiveValue: {
+      print($0) // <- Outputs 4
+    })
+    .store(in: &subscriptions)
+
+  print("Sending 1")
+  subject.send(1)
+  print("Sending 2")
+  subject.send(2)
+  print("Sending 4")
+  subject.send(4)
+  subject.send(completion: .finished) // <- Doesn't execute anything until the completion event is sent.
+}
+
+example(of: "prefix()") {
+  var subject = PassthroughSubject<Int, Never>()
+
+  subject
+    .prefix(2)
+    .sink(receiveCompletion: { _ in
+      print("Received completion event")
+    }, receiveValue: {
+      print($0) // <- Outputs 1, 2
+    })
+    .store(in: &subscriptions)
+
+  print("Sending 1")
+  subject.send(1)
+  print("Sending 2")
+  subject.send(2)
+  print("Sending 3")
+  subject.send(3) // <- This value will never be received.
+  subject.send(completion: .finished) // <- It's okay to send the completion
+  // multiple times
+}
+
+example(of: "drop()") {
+  var subject = PassthroughSubject<Int, Never>()
+
+  subject
+    .dropFirst(2) // <- Drops the first 2 values
+    .drop { $0.isMultiple(of: 3) } // <- Drops all values that are multiples of 2
+    .sink(receiveCompletion: { _ in
+      print("Received completion event")
+    }, receiveValue: {
+      print("Received value: \($0)") // <- Received value: 4
+    })
+    .store(in: &subscriptions)
+
+  print("Sending 1")
+  subject.send(1) // <- First value is dropped
+  print("Sending 2")
+  subject.send(2) // <- Second value is dropped
+  print("Sending 3")
+  subject.send(3) // <- This value doesn't match the second operator,
+  // so it is also dropped
+  print("Sending 4")
+  subject.send(4) // <- This value is received
+  print("Sending 5")
+  subject.send(5) // <- Drop operators have finished their job, so they forward all
+  // events now. This value is received.
+  subject.send(completion: .finished)
+}
+
 /// Copyright (c) 2020 Razeware LLC
 ///
 /// Permission is hereby granted, free of charge, to any person obtaining a copy
