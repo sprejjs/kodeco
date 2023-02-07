@@ -67,12 +67,12 @@ public final class JokesViewModel: ObservableObject {
 
     jokesService
       .publisher()
-      .retry(2)
+      .retry(1)
       .decode(type: Joke.self, decoder: Self.decoder)
       .replaceError(with: Joke.error)
       .receive(on: DispatchQueue.main)
       .handleEvents (receiveOutput: { [unowned self] output in
-        self.joke = joke
+        self.joke = output
       })
       .filter { $0 != Joke.error }
       .flatMap { [unowned self] in
@@ -92,7 +92,7 @@ public final class JokesViewModel: ObservableObject {
 
       return self.translationService
         .publisher(for: joke, to: languageCode)
-        .retry(3)
+        .retry(1)
         .decode(type: TranslationResponse.self, decoder: Self.decoder)
         .compactMap { $0.translations.first }
         .map {

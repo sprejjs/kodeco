@@ -105,7 +105,23 @@ final class JokesViewModelTests: XCTestCase {
   }
   
   func test_backgroundColorFor50TranslationPercentIsGreen() {
-    //Add test code here
+    // GIVEN
+    let viewModel = self.viewModel()
+    let translationPercent = 0.5
+    let expected = Color("Green")
+    var result: Color = .clear
+
+    viewModel.$backgroundColor
+      .sink {
+        result = $0
+      }
+      .store(in: &subscriptions)
+
+    // WHEN
+    viewModel.updateBackgroundColorForTranslation(translationPercent)
+
+    // THEN
+    XCTAssert(result == expected, "Color expected to be \(expected) but was \(result)")
   }
   
   func test_decisionStateFor60TranslationPercentIsLiked() {
@@ -153,7 +169,27 @@ final class JokesViewModelTests: XCTestCase {
   }
   
     func test_fetchJokeSucceeds() {
-      //Add test code here
+      // GIVEN
+      let viewModel = self.viewModel()
+      let expectation = self.expectation(description: #function)
+      let expected = self.testJoke.value
+      var result: Joke!
+
+      viewModel
+        .$joke
+        .dropFirst()
+        .sink {
+          result = $0
+          expectation.fulfill()
+        }
+        .store(in: &subscriptions)
+
+      // WHEN
+      viewModel.fetchJoke()
+
+      // THEN
+      waitForExpectations(timeout: 1, handler: nil)
+      XCTAssert(result == expected, "Joke expected to be \(expected) but was \(String(describing: result))")
     }
     
     func test_fetchJokeReceivesErrorJoke() {
