@@ -43,22 +43,68 @@ public final class JokesViewModel {
   @Published public var decisionState: DecisionState = .undecided
   @Published public var showTranslation = false
 
+  private let jokesService: JokeServiceDataPublisher
+  private let translationService: TranslationServiceDataPublisher
+
   private var subscriptions = Set<AnyCancellable>()
   private var jokeSubscriptions = Set<AnyCancellable>()
 
-  public init(jokesService: JokeServiceDataPublisher? = nil,
-              translationService: TranslationServiceDataPublisher? = nil) {
+  public init(jokesService: JokeServiceDataPublisher = JokesService(),
+              translationService: TranslationServiceDataPublisher = TranslationService()) {
+    self.jokesService = jokesService
+    self.translationService = translationService
 
-
+    $joke // <- Accessing the publisher of the "joke" property
+      .map { _ in false } // <- Whenever it publishes any value we produce "false"
+      .assign(to: \.fetching, on: self) // <- And assign it to the "fetching" property.
+      .store(in: &subscriptions)
   }
   
   public func fetchJoke() {
-    
+    fetching = true // <- Updating the "fetching" property to "true" to indicate the network request
+
+    jokeSubscriptions = [] // <- Clearing old subscriptions if any
+
+    jokesService
+      .publisher()
+      .retry(2)
+      .decode(type: Joke.self, decoder: Self.decoder)
+      .replaceError(with: Joke.error)
+      .handleEvents (receiveOutput: { [unowned self] output in
+        self.joke = joke
+      })
+      .filter { $0 != Joke.error }
+      .flatMap { [unowned self] in
+        self.fetchTranslation(for: $0, to: "es")
+      }
+      .receive(on: DispatchQueue.main)
+      .assign(to: \.joke, on: self)
+      .store(in: &jokeSubscriptions)
   }
   
   func fetchTranslation(for joke: Joke, to languageCode: String)
     -> AnyPublisher<Joke, Never> {
-      return Empty().eraseToAnyPublisher()
+      guard joke.languageCode != languageCode else {
+        return Just(joke)
+          .eraseToAnyPublisher()
+      }
+
+      return self.translationService
+        .publisher(for: joke, to: languageCode)
+        .retry(3)
+        .decode(type: TranslationResponse.self, decoder: Self.decoder)
+        .compactMap { $0.translations.first }
+        .map {
+          Joke(
+            id: joke.id,
+            value: joke.value,
+            categories: joke.categories,
+            languageCode: languageCode,
+            translatedValue: $0)
+        }
+        .replaceError(with: Joke.error)
+        .receive(on: DispatchQueue.main)
+        .eraseToAnyPublisher()
   }
   
   public func updateBackgroundColorForTranslation(_ translation: Double) {
