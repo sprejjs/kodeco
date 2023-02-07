@@ -27,13 +27,45 @@
 /// THE SOFTWARE.
 
 import SwiftUI
+import CoreData
 
 @main
 struct ChuckNorrisJokesApp: App {
+
+  @Environment(\.scenePhase) private var scenePhase
   
   var body: some Scene {
     WindowGroup {
       JokeView()
+          .environment(\.managedObjectContext, CoreDataStack.viewContext)
+    }
+    .onChange(of: scenePhase) {
+      if $0 == .background {
+        CoreDataStack.save()
+      }
+    }
+  }
+}
+
+private enum CoreDataStack {
+  static var viewContext: NSManagedObjectContext = {
+    let container = NSPersistentContainer(name: "ChuckNorrisJokes")
+    container.loadPersistentStores { _, error in
+      if let error = error {
+        fatalError("Failed to load persistent stores: \(error)")
+      }
+    }
+    return container.viewContext
+  }()
+
+  static func save() {
+    guard viewContext.hasChanges else { return }
+
+    do {
+      try viewContext.save()
+    } catch {
+      let nsError = error as NSError
+      fatalError("Unresolved error \(nsError), \(nsError.userInfo)")
     }
   }
 }
