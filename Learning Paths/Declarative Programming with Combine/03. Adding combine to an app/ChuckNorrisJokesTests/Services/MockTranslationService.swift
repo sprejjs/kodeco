@@ -38,6 +38,16 @@ struct MockTranslationService: TranslationServiceDataPublisher {
     self.data = data
     self.error = error
   }
-  
-  
+
+  func publisher(for joke: ChuckNorrisJokesModel.Joke, to languageCode: String) -> AnyPublisher<Data, URLError> {
+    let publisher = CurrentValueSubject<Data, URLError>(data)
+    if let error {
+      DispatchQueue.global().asyncAfter(deadline: .now() + .milliseconds(100)) {
+        publisher.send(completion: .failure(error))
+      }
+    }
+
+    return publisher
+      .eraseToAnyPublisher()
+  }
 }

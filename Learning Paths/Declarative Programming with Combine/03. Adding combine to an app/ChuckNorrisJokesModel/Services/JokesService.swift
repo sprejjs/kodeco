@@ -46,3 +46,12 @@ public struct JokesService {
   public init() { }
 }
 
+extension JokesService: JokeServiceDataPublisher {
+  public func publisher() -> AnyPublisher<Data, URLError> {
+    URLSession
+      .shared
+      .dataTaskPublisher(for: url)
+      .map(\.data)
+      .eraseToAnyPublisher()
+  }
+}

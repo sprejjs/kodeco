@@ -38,6 +38,14 @@ struct MockJokesService: JokeServiceDataPublisher {
     self.data = data
     self.error = error
   }
-  
-  
+
+  func publisher() -> AnyPublisher<Data, URLError> {
+    if let error {
+      return Fail(error: error).eraseToAnyPublisher()
+    }
+
+    return Just(data)
+      .setFailureType(to: URLError.self)
+      .eraseToAnyPublisher()
+  }
 }
