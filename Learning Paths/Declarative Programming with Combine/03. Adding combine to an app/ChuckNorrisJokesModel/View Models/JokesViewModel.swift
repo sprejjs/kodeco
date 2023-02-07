@@ -37,8 +37,12 @@ public final class JokesViewModel {
   
   private static let decoder = JSONDecoder()
 
-  //TODO: add services here
-  
+  @Published public var fetching: Bool = false
+  @Published public var joke: Joke = Joke.starter
+  @Published public var backgroundColor = Color("Gray")
+  @Published public var decisionState: DecisionState = .undecided
+  @Published public var showTranslation = false
+
   private var subscriptions = Set<AnyCancellable>()
   private var jokeSubscriptions = Set<AnyCancellable>()
 
