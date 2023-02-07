@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		028C2B1A29925F9F0006B276 /* JokesManagedObject+.swift in Sources */ = {isa = PBXBuildFile; fileRef = 028C2B1929925F9F0006B276 /* JokesManagedObject+.swift */; };
 		A2907535235217290003716E /* ChuckNorrisJokes.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = A2907533235217290003716E /* ChuckNorrisJokes.xcdatamodeld */; };
 		AE26D6A026643AB100AEDDD3 /* ChuckNorrisJokesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE26D69F26643AB100AEDDD3 /* ChuckNorrisJokesApp.swift */; };
 		D228A084231334E200EB6975 /* MockJokesService.swift in Sources */ = {isa = PBXBuildFile; fileRef = D228A083231334E200EB6975 /* MockJokesService.swift */; };
@@ -70,6 +71,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		028C2B1929925F9F0006B276 /* JokesManagedObject+.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "JokesManagedObject+.swift"; sourceTree = "<group>"; };
 		A2907534235217290003716E /* ChuckNorrisJokes.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = ChuckNorrisJokes.xcdatamodel; sourceTree = "<group>"; };
 		AE26D69F26643AB100AEDDD3 /* ChuckNorrisJokesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChuckNorrisJokesApp.swift; sourceTree = "<group>"; };
 		D228A083231334E200EB6975 /* MockJokesService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockJokesService.swift; sourceTree = "<group>"; };
@@ -269,6 +271,7 @@
 			isa = PBXGroup;
 			children = (
 				A2907533235217290003716E /* ChuckNorrisJokes.xcdatamodeld */,
+				028C2B1929925F9F0006B276 /* JokesManagedObject+.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -484,6 +487,7 @@
 				D2E94672230B53020012CFFB /* JokeCardView.swift in Sources */,
 				D2568BB0230AEAA600FFB4E3 /* ChuckNorrisJokesStyleKit.swift in Sources */,
 				D2E94671230B53020012CFFB /* JokeView.swift in Sources */,
+				028C2B1A29925F9F0006B276 /* JokesManagedObject+.swift in Sources */,
 				D2B46CAF230C7C6F003B2DFA /* SavedJokesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
