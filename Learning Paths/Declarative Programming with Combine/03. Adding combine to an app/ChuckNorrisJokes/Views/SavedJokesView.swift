@@ -34,14 +34,12 @@ struct SavedJokesView: View {
     VStack {
       NavigationView {
         List {
-          ForEach(jokes, id: \.self) { joke in
-            //TODO: update here to provide translation
-            Text(joke)
+          ForEach(jokes, id: \.self) { (joke: JokeManagedObject) in
+            Text((showTranslation ? joke.translatedValue : joke.value) ?? "N/A")
               .lineLimit(nil)
           }
           .onDelete { indices in
-            // TODO: Add call to delete helper method
-            
+            jokes.delete(at: indices, inViewContext: viewContext)
           }
         }
         .navigationBarTitle("Saved Jokes")
@@ -67,10 +65,13 @@ struct SavedJokesView: View {
   }
   
   @State private var showTranslation = false
-  //TODO: add view context property here
-  
-  //TODO: Replace with Fetch Request
-  private var jokes = [String]()
+  @Environment(\.managedObjectContext) var viewContext
+
+  @FetchRequest(
+    sortDescriptors: [NSSortDescriptor(keyPath: \JokeManagedObject.value, ascending: true)],
+    animation: .default
+  )
+  private var jokes: FetchedResults<JokeManagedObject>
 }
 
 struct SavedJokesView_Previews: PreviewProvider {

@@ -35,21 +35,19 @@ struct JokeView: View {
       NavigationView {
         VStack {
           Spacer()
-          
+
           LargeInlineButton(title: "Show Saved") {
             self.presentSavedJokes = true
           }
-          .padding(20)
+            .padding(20)
         }
-        .navigationBarTitle("Chuck Norris Jokes")
+          .navigationBarTitle("Chuck Norris Jokes")
       }
       .sheet(isPresented: $presentSavedJokes) {
         SavedJokesView()
-          //TODO: pass the view context into the environment
-//          .environment(\.managedObjectContext, self.viewContext)
+          .environment(\.managedObjectContext, self.viewContext)
       }
-      
-      
+
       HStack {
         Circle()
           .trim(from: 0.5, to: 1)
@@ -72,7 +70,7 @@ struct JokeView: View {
           viewModel.decisionState == .disliked ? hudOpacity : 0
         )
         .animation(.easeInOut)
-      
+
       HUDView(imageType: .rofl)
         .opacity(
           viewModel.decisionState == .liked ? hudOpacity : 0
@@ -81,19 +79,25 @@ struct JokeView: View {
     }
   }
 
-  //add view context property here
+  @Environment(\.managedObjectContext) private var viewContext
   @ObservedObject private var viewModel = JokesViewModel()
-  
+
   @State private var showJokeView = true
   @State private var showFetchingJoke = false
   @State private var cardTranslation: CGSize = .zero
   @State private var hudOpacity = 0.5
   @State private var presentSavedJokes = false
-  
-  private var bounds: CGRect { UIScreen.main.bounds }
-  private var translation: Double { Double(cardTranslation.width / bounds.width) }
-  private var circleDiameter: CGFloat { bounds.width * 0.9 }
-  
+
+  private var bounds: CGRect {
+    UIScreen.main.bounds
+  }
+  private var translation: Double {
+    Double(cardTranslation.width / bounds.width)
+  }
+  private var circleDiameter: CGFloat {
+    bounds.width * 0.9
+  }
+
   private var jokeCardView: some View {
     JokeCardView(viewModel: viewModel)
       .background(viewModel.backgroundColor)
@@ -107,18 +111,18 @@ struct JokeView: View {
           .onChanged { change in
             self.cardTranslation = change.translation
             self.updateBackgroundColor()
-        }
-        .onEnded { change in
-          self.updateDecisionStateForChange(change)
-          self.handle(change)
-        }
-    )
+          }
+          .onEnded { change in
+            self.updateDecisionStateForChange(change)
+            self.handle(change)
+          }
+      )
   }
-  
+
   private var rotationAngle: Angle {
     return Angle(degrees: 75 * translation)
   }
-  
+
   private func updateDecisionStateForChange(_ change: DragGesture.Value) {
     viewModel.updateDecisionStateForTranslation(
       translation,
@@ -126,22 +130,24 @@ struct JokeView: View {
       inBounds: bounds
     )
   }
-  
+
   private func updateBackgroundColor() {
     viewModel.updateBackgroundColorForTranslation(translation)
   }
-  
+
   private func handle(_ change: DragGesture.Value) {
     // 1
     let decisionState = viewModel.decisionState
 
     switch decisionState {
-    // 2
+      // 2
     case .undecided:
       cardTranslation = .zero
       self.viewModel.reset()
     default:
-      //TODO: add decisionState == .liked here
+      if decisionState == .liked {
+        JokeManagedObject.save(joke: viewModel.joke, inViewContext: viewContext)
+      }
 
       // 3
       let translation = change.translation
@@ -153,7 +159,7 @@ struct JokeView: View {
       reset()
     }
   }
-  
+
   private func reset() {
     DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
       self.showFetchingJoke = true
@@ -161,7 +167,7 @@ struct JokeView: View {
       self.cardTranslation = .zero
       self.viewModel.reset()
       self.viewModel.fetchJoke()
-      
+
       DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
         self.showFetchingJoke = false
         self.hudOpacity = 0
@@ -172,18 +178,18 @@ struct JokeView: View {
 }
 
 #if DEBUG
-struct JokeView_Previews: PreviewProvider {
-  static var previews: some View {
-    Group {
-      JokeView()
-        .previewDevice("iPhone Xs Max")
-        .previewDisplayName("iPhone Xs Max")
-      
-      JokeView()
-        .previewDevice("iPhone SE")
-        .previewDisplayName("iPhone SE")
-        .environment(\.colorScheme, .dark)
+  struct JokeView_Previews: PreviewProvider {
+    static var previews: some View {
+      Group {
+        JokeView()
+          .previewDevice("iPhone Xs Max")
+          .previewDisplayName("iPhone Xs Max")
+
+        JokeView()
+          .previewDevice("iPhone SE")
+          .previewDisplayName("iPhone SE")
+          .environment(\.colorScheme, .dark)
+      }
     }
   }
-}
 #endif
