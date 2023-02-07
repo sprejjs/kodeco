@@ -82,7 +82,7 @@ struct JokeView: View {
   }
 
   //add view context property here
-  private var viewModel = JokesViewModel()
+  @ObservedObject private var viewModel = JokesViewModel()
   
   @State private var showJokeView = true
   @State private var showFetchingJoke = false

@@ -30,7 +30,7 @@ import UIKit
 import Combine
 import SwiftUI
 
-public final class JokesViewModel {
+public final class JokesViewModel: ObservableObject {
   public enum DecisionState {
     case disliked, undecided, liked
   }
@@ -70,6 +70,7 @@ public final class JokesViewModel {
       .retry(2)
       .decode(type: Joke.self, decoder: Self.decoder)
       .replaceError(with: Joke.error)
+      .receive(on: DispatchQueue.main)
       .handleEvents (receiveOutput: { [unowned self] output in
         self.joke = joke
       })
