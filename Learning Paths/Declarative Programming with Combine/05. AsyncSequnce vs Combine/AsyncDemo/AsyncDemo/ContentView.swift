@@ -47,7 +47,7 @@ struct ContentView: View {
       Button("Fetch songs") {
         task = Task.init {
           do {
-            try await fetchSongs(for: "Marilyn Manson")
+            songs = try await fetchSongs(for: "Marilyn Manson")
           } catch {
             print("Error: \(error)")
             songs = []
