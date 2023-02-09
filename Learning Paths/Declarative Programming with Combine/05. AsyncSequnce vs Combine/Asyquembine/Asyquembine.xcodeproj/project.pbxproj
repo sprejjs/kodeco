@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0249BC362994D7E8004CF4AF /* AsyncEncodedModelSequence.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0249BC352994D7E8004CF4AF /* AsyncEncodedModelSequence.swift */; };
 		491E804926892B4F0032338E /* EncodedModelIterator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 491E804826892B4F0032338E /* EncodedModelIterator.swift */; };
 		49F3F19726887F3F00D2B5F8 /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49F3F19626887F3F00D2B5F8 /* Model.swift */; };
 		49FAE77C2686709B00BB5AC4 /* App.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49FAE77B2686709B00BB5AC4 /* App.swift */; };
@@ -16,6 +17,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0249BC352994D7E8004CF4AF /* AsyncEncodedModelSequence.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AsyncEncodedModelSequence.swift; sourceTree = "<group>"; };
 		491E804826892B4F0032338E /* EncodedModelIterator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EncodedModelIterator.swift; sourceTree = "<group>"; };
 		49F3F19626887F3F00D2B5F8 /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		49FAE7782686709B00BB5AC4 /* Asyquembine.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Asyquembine.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -61,6 +63,7 @@
 				491E804826892B4F0032338E /* EncodedModelIterator.swift */,
 				49FAE77F2686709D00BB5AC4 /* Assets.xcassets */,
 				49FAE7812686709D00BB5AC4 /* Preview Content */,
+				0249BC352994D7E8004CF4AF /* AsyncEncodedModelSequence.swift */,
 			);
 			path = Asyquembine;
 			sourceTree = "<group>";
@@ -144,6 +147,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				49FAE77E2686709B00BB5AC4 /* ContentView.swift in Sources */,
+				0249BC362994D7E8004CF4AF /* AsyncEncodedModelSequence.swift in Sources */,
 				49FAE77C2686709B00BB5AC4 /* App.swift in Sources */,
 				491E804926892B4F0032338E /* EncodedModelIterator.swift in Sources */,
 				49F3F19726887F3F00D2B5F8 /* Model.swift in Sources */,

@@ -34,8 +34,10 @@ import SwiftUI
 
 struct ContentView {
   private let syncIterator = EncodedModelIterator()
+  private let asyncSequence = AsyncEncodedModelSequence()
 
   @State var publishedModel: Model?
+  @State var asyncModel: Model?
 }
 
 extension ContentView: View {
@@ -52,6 +54,23 @@ extension ContentView: View {
           .decode(type: Model?.self, decoder: JSONDecoder())
           .replaceError(with: nil)
       ) { publishedModel = $0 }
+    }
+
+    Divider()
+      .padding()
+
+    IteratorView(
+      title: "Async Iterator",
+      syncIterator: asyncSequence.syncIterator,
+      model: $asyncModel)
+    .task {
+      do {
+        for try await model in asyncSequence {
+          asyncModel = try JSONDecoder().decode(Model.self, from: model)
+        }
+      } catch {
+        asyncModel = nil
+      }
     }
   }
 }
@@ -92,11 +111,5 @@ private extension ContentView {
       .buttonStyle(.bordered)
       .padding()
     }
-  }
-}
-
-struct ContentView_Previews: PreviewProvider {
-  static var previews: some View {
-    ContentView()
   }
 }

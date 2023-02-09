@@ -44,7 +44,7 @@ final class EncodedModelIterator {
       .publish(every: 2/3, on: .main, in: .default)
       .autoconnect()
       .sink { [unowned self] _ in
-        _ = intIterator.next()
+        _ = next()
       }
       .cancel
   }
