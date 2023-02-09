@@ -32,14 +32,92 @@
 
 import SwiftUI
 
-struct ContentView: View {
-  var body: some View {
-    Text("Hello, Async/Await!")
-  }
+enum FetchError: Error {
+  case statusCode(Int)
+  case urlResponse
 }
 
-struct ContentView_Previews: PreviewProvider {
-  static var previews: some View {
-    ContentView()
+struct ContentView: View {
+
+  @State private var songs = [MusicItem]()
+  @State private var task: Task<Void, Never>?
+
+  var body: some View {
+    VStack {
+      Button("Fetch songs") {
+        task = Task.init {
+          do {
+            try await fetchSongs(for: "Marilyn Manson")
+          } catch {
+            print("Error: \(error)")
+            songs = []
+          }
+        }
+      }
+      Button("Cancel the task") {
+        task?.cancel()
+      }
+      List(songs) { song in
+        Text("\(song.trackName) - \(song.artistName)")
+      }
+      .task {
+        do {
+          try await withThrowingTaskGroup(of: [MusicItem].self) { group in
+            group.addTask {
+              try await fetchSongs(for: "Marilyn Manson")
+            }
+            group.addTask {
+              try await fetchSongs(for: "Eminem")
+            }
+            songs = try await group.reduce([], +)
+          }
+        } catch {
+          print("Error: \(error)")
+          songs = []
+        }
+      }
+    }
+  }
+
+  func fetchSongs(for artist: String) async throws -> [MusicItem] {
+    print("fetch songs start: \(artist)")
+    if #available(iOS 16.0, *) {
+      try await Task.sleep(for: .seconds(5))
+    } else {
+      try await Task.sleep(nanoseconds: 5_000_000_000)
+    }
+    guard let url = buildItunesUrl(for: artist) else {
+      fatalError("Unable to construct a url for \(artist)")
+    }
+
+    guard !Task.isCancelled else { // <- Handling cancelation manually
+      print("The task was cancelled")
+      return []
+    }
+    try Task.checkCancellation() // <- Letting the framework check for cancelation and throw an error
+
+    let (data, response) = try await URLSession.shared.data(from: url)
+    print("received data: \(artist)")
+    guard let httpResponse = response as? HTTPURLResponse else {
+      throw FetchError.urlResponse
+    }
+    guard (200..<300).contains(httpResponse.statusCode) else {
+      throw FetchError.statusCode(httpResponse.statusCode)
+    }
+
+    let decoder = JSONDecoder()
+    return try decoder.decode(MediaResponse.self, from: data).results
+  }
+
+  func buildItunesUrl(for searchTerm: String) -> URL? {
+    var urlComponents = URLComponents()
+    urlComponents.scheme = "https"
+    urlComponents.host = "itunes.apple.com"
+    urlComponents.path = "/search"
+    urlComponents.queryItems = [
+      URLQueryItem(name: "term", value: searchTerm),
+      URLQueryItem(name: "entity", value: "song")
+    ]
+    return urlComponents.url
   }
 }
