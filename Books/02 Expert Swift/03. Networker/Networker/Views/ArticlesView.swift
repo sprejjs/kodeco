@@ -15,6 +15,11 @@ struct ArticlesView: View {
     }
     .onAppear(perform: viewModel.fetchArticles)
   }
+
+  init() {
+    ArticlesViewModel()
+      .fetchArticles()
+  }
 }
 
 struct ArticlesView_Previews: PreviewProvider {

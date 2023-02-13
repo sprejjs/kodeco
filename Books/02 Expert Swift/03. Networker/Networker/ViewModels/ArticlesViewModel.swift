@@ -6,15 +6,55 @@
 import SwiftUI
 import Combine
 
-class ArticlesViewModel: ObservableObject {
+final class ArticlesViewModel: ObservableObject {
   @Published private(set) var articles: [Article] = []
 
   private var cancellables: Set<AnyCancellable> = []
+  private var networker: Networking
+
+  init(networker: Networking = Networker()) {
+    self.networker = networker
+    self.networker.delegate = self
+  }
 
   func fetchArticles() {
-    articles = [ArticleRow_Previews.article]
+    let request = ArticleRequest()
+    networker.fetch(request)
+      .tryMap([Article].init)
+      .replaceError(with: [])
+      .assign(to: \.articles, on: self)
+      .store(in: &cancellables)
   }
 
   func fetchImage(for article: Article) {
+    guard article.downloadedImage == nil else {
+      return
+    }
+    guard let index = articles.firstIndex(where: { $0.id == article.id }) else {
+      return
+    }
+
+    let request = ImageRequest(url: article.image)
+    networker.fetch(request)
+      .replaceError(with: Data())
+      .map { UIImage(data: $0) }
+      .receive(on: DispatchQueue.main)
+      .sink { [weak self] image in
+        self?.articles[index].downloadedImage = image
+      }
+      .store(in: &cancellables)
+  }
+}
+
+extension ArticlesViewModel: NetworkingDelegate {
+  func headers(for networking: Networking) -> [String : String] {
+    return ["Content-Type": "application/vnd.api+json; charset=utf-8"]
+  }
+
+  func networking(
+    _ networking: Networking,
+    transformPublisher publisher: AnyPublisher<Data, URLError>
+  ) -> AnyPublisher<Data, URLError> {
+    publisher.receive(on: DispatchQueue.main).eraseToAnyPublisher()
   }
 }
