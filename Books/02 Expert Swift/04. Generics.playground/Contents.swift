@@ -29,15 +29,24 @@ struct ExampleStruct: Example {
   typealias Test = String
 }
 
+//struct Miles: UnitOfMeasurement {
+//  func maxSpeed() -> Int { // <- The method returns an `Int` which is enough for
+//    // the Swift compiler to infer the associated type
+//    return 12
+//  }
+//}
+
+
+
+//func fetch(_ unit: UnitOfMeasurement) { // ❎ Unable to use PAT as a type
+//}
+
+
+//func fetch<P: UnitOfMeasurement>(_ unit: P) { // ✅ This is fine in older versions of Swift
+//}
+
 protocol UnitOfMeasurement {
   associatedtype Unit
-
-  func maxSpeed() -> Unit
 }
-
-struct Miles: UnitOfMeasurement {
-  func maxSpeed() -> Int { // <- The method returns an `Int` which is enough for
-    // the Swift compiler to infer the associated type
-    return 12
-  }
+func fetch(_ unit: any UnitOfMeasurement) { // ✅ This is fine as of Swift 5.6
 }

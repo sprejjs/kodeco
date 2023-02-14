@@ -7,12 +7,6 @@ import Foundation
 import Combine
 import UIKit
 
-protocol Networking {
-  var delegate: NetworkingDelegate? { get set }
-
-  func fetch(_ request: Request) -> AnyPublisher<Data, URLError>
-}
-
 protocol NetworkingDelegate: AnyObject {
   func headers(for networking: Networking) -> [String: String]
 
@@ -35,25 +29,54 @@ extension NetworkingDelegate {
   }
 }
 
+protocol Networking {
+  var delegate: NetworkingDelegate? { get set }
+
+  func fetch<R: Request>(_ request: R) -> AnyPublisher<R.Output, Error>
+  func fetchWithCache<R: Request>(_ request: R)
+    -> AnyPublisher<R.Output, Error> where R.Output == UIImage
+}
+
 final class Networker: Networking {
+  private let jsonDecoder = JSONDecoder()
+  private let imageCache = RequestCache<UIImage>()
+
   weak var delegate: NetworkingDelegate?
 
-  func fetch(_ request: Request) -> AnyPublisher<Data, URLError> {
+  func fetchWithCache<R: Request>(_ request: R)
+    -> AnyPublisher<R.Output, Error> where R.Output == UIImage {
+    if let response = imageCache.response(for: request) {
+      return Just<R.Output>(response)
+        .setFailureType(to: Error.self)
+        .eraseToAnyPublisher()
+    }
+
+    return fetch(request)
+        .handleEvents(receiveOutput: { [weak self] in
+          self?.imageCache.saveResponse(for: request, response: $0)
+        })
+        .eraseToAnyPublisher()
+  }
+
+  func fetch<R: Request>(_ request: R) -> AnyPublisher<R.Output, Error> {
     let method = request.method.rawValue
 
-    var request = URLRequest(url: request.url)
-    request.allHTTPHeaderFields = delegate?.headers(for: self)
-    request.httpMethod = method
+    var urlRequest = URLRequest(url: request.url)
+    urlRequest.allHTTPHeaderFields = delegate?.headers(for: self)
+    urlRequest.httpMethod = method
 
-    let publisher = URLSession.shared
-      .dataTaskPublisher(for: request)
+    var publisher = URLSession.shared
+      .dataTaskPublisher(for: urlRequest)
       .map(\.data)
       .eraseToAnyPublisher()
 
     if let delegate {
-      return delegate.networking(self, transformPublisher: publisher)
-    } else {
-      return publisher
+      publisher = delegate
+        .networking(self, transformPublisher: publisher)
     }
+
+    return publisher
+      .tryMap(request.decode)
+      .eraseToAnyPublisher()
   }
 }

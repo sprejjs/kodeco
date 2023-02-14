@@ -6,6 +6,8 @@
 import Foundation
 
 struct ArticleRequest: Request {
+  typealias Output = [Article]
+
   let url: URL = {
     guard var components = URLComponents(string: "https://api.raywenderlich.com/") else {
       fatalError("Unable to create URLComponents")
@@ -22,4 +24,8 @@ struct ArticleRequest: Request {
   }()
 
   let method: HTTPMethod = .get
+
+  func decode(_ data: Data) throws -> [Article] {
+    try JSONDecoder().decode(Articles.self, from: data).data.map { $0.article }
+  }
 }

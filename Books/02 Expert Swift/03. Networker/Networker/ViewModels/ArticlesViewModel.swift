@@ -27,18 +27,14 @@ final class ArticlesViewModel: ObservableObject {
   }
 
   func fetchImage(for article: Article) {
-    guard article.downloadedImage == nil else {
-      return
-    }
     guard let index = articles.firstIndex(where: { $0.id == article.id }) else {
       return
     }
 
     let request = ImageRequest(url: article.image)
-    networker.fetch(request)
-      .replaceError(with: Data())
-      .map { UIImage(data: $0) }
-      .receive(on: DispatchQueue.main)
+
+    networker.fetchWithCache(request)
+      .replaceError(with: UIImage())
       .sink { [weak self] image in
         self?.articles[index].downloadedImage = image
       }
