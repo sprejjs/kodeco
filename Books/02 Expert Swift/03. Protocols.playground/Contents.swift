@@ -274,6 +274,14 @@ struct StructB: SomeProtocol, AnotherProtocol {
   }
 }
 
+extension Array where Element: SomeProtocol {
+  func printSome() {
+    self.forEach {
+      print($0.someMethod())
+    }
+  }
+}
+
 extension Array where Element: SomeProtocol & AnotherProtocol {
   func printSomeAndAnother() {
     self.forEach {
@@ -283,18 +291,11 @@ extension Array where Element: SomeProtocol & AnotherProtocol {
   }
 }
 
-extension Array where Element: SomeProtocol {
-  func printSome() {
-    self.forEach {
-      print($0.someMethod())
-    }
-  }
-}
-
 let structA = StructA()
 let structB = StructB()
 
-let test: [SomeProtocol & AnotherProtocol] = [structA, structB]
+//let test: [any SomeProtocol] = [structA, structB]
+//test.printSome()
 //test.printSomeAndAnother()
 
 [StructA(), StructA(), StructA()].printSomeAndAnother()
@@ -305,4 +306,47 @@ extension Array: Greetable where Element: Greetable {
   }
 }
 
+struct Preference<T> {
+  var value: T?
+}
+
+extension Preference {
+  mutating func save(from untypedValue: Any) {
+    if let value = untypedValue as? T {
+      self.value = value
+    }
+  }
+}
+
+extension Preference where T: Decodable { // <- Will only apply if T is Decodable
+  mutating func save(from json: Data) throws {
+    let decoder = JSONDecoder()
+    self.value = try decoder.decode(T.self, from: json)
+  }
+}
+
+extension Preference {
+  mutating func save2(from json: Data) throws where T: Decodable{
+    let decoder = JSONDecoder()
+    self.value = try decoder.decode(T.self, from: json)
+  }
+}
+
+protocol Networker {}
+
+class WebsocketNetworker: Networker {
+  class func whoAmI() -> Networker.Type {
+    return self
+  }
+
+  func whoAmI() -> Networker.Type {
+    return Self.self
+  }
+}
+
+let type: Networker.Type = WebsocketNetworker.whoAmI()
+print(type) // <- WebsocketNetworker
+
+let websocket = WebsocketNetworker()
+print(websocket.whoAmI()) // <- WebsocketNetworker
 
