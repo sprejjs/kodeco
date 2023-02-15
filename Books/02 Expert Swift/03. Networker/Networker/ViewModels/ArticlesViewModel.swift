@@ -22,7 +22,9 @@ final class ArticlesViewModel: ObservableObject {
     networker.fetch(request)
       .tryMap([Article].init)
       .replaceError(with: [])
-      .assign(to: \.articles, on: self)
+      .sink { [unowned self] in
+        self.articles = $0
+      }
       .store(in: &cancellables)
   }
 
