@@ -14,6 +14,7 @@
 		02BC571929AA2D2E00DD0BF7 /* First_Core_Data_App.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = 02BC571729AA2D2E00DD0BF7 /* First_Core_Data_App.xcdatamodeld */; };
 		02BC571B29AA2D3600DD0BF7 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 02BC571A29AA2D3600DD0BF7 /* Assets.xcassets */; };
 		02BC571E29AA2D3600DD0BF7 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 02BC571C29AA2D3600DD0BF7 /* LaunchScreen.storyboard */; };
+		02BC572929AA333900DD0BF7 /* UITableViewCell+ReuseIdentifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02BC572829AA333900DD0BF7 /* UITableViewCell+ReuseIdentifier.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -26,6 +27,7 @@
 		02BC571A29AA2D3600DD0BF7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		02BC571D29AA2D3600DD0BF7 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		02BC571F29AA2D3600DD0BF7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		02BC572829AA333900DD0BF7 /* UITableViewCell+ReuseIdentifier.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UITableViewCell+ReuseIdentifier.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -58,6 +60,7 @@
 		02BC570D29AA2D2E00DD0BF7 /* First Core Data App */ = {
 			isa = PBXGroup;
 			children = (
+				02BC572729AA333900DD0BF7 /* Extensions */,
 				02BC570E29AA2D2E00DD0BF7 /* AppDelegate.swift */,
 				02BC571029AA2D2E00DD0BF7 /* SceneDelegate.swift */,
 				02BC571229AA2D2E00DD0BF7 /* ViewController.swift */,
@@ -68,6 +71,14 @@
 				02BC571729AA2D2E00DD0BF7 /* First_Core_Data_App.xcdatamodeld */,
 			);
 			path = "First Core Data App";
+			sourceTree = "<group>";
+		};
+		02BC572729AA333900DD0BF7 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				02BC572829AA333900DD0BF7 /* UITableViewCell+ReuseIdentifier.swift */,
+			);
+			path = Extensions;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -141,6 +152,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				02BC572929AA333900DD0BF7 /* UITableViewCell+ReuseIdentifier.swift in Sources */,
 				02BC571329AA2D2E00DD0BF7 /* ViewController.swift in Sources */,
 				02BC570F29AA2D2E00DD0BF7 /* AppDelegate.swift in Sources */,
 				02BC571929AA2D2E00DD0BF7 /* First_Core_Data_App.xcdatamodeld in Sources */,
