@@ -31,6 +31,7 @@
 /// THE SOFTWARE.
 
 import UIKit
+import CoreData
 
 class ViewController: UIViewController {
   // MARK: - IBOutlets
@@ -44,22 +45,169 @@ class ViewController: UIViewController {
   @IBOutlet weak var wearButton: UIButton!
   @IBOutlet weak var rateButton: UIButton!
 
+  private var currentBowTie: BowTie! {
+    didSet {
+      populate(bowTie: currentBowTie)
+    }
+  }
+
+  private lazy var appDelegate: AppDelegate = {
+    (UIApplication.shared.delegate as! AppDelegate)
+  }()
+
+  private lazy var managedContext: NSManagedObjectContext = {
+    appDelegate.persistentContainer.viewContext
+  }()
+
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
+
+    insertSampleData()
+
+    let request = BowTie.fetchRequest()
+    let firstTitle = segmentedControl.titleForSegment(at: 0) ?? ""
+    request.predicate = NSPredicate(
+      format: "\(#keyPath(BowTie.searchKey)) == '\(firstTitle)'")
+
+    let results = try! managedContext.fetch(request)
+    if let tie = results.first {
+      currentBowTie = tie
+    }
   }
 
   // MARK: - IBActions
 
   @IBAction func segmentedControl(_ sender: UISegmentedControl) {
-    // Add code here
+    guard let selectedValue = sender.titleForSegment(at: sender.selectedSegmentIndex) else {
+      return
+    }
+
+    let request = BowTie.fetchRequest()
+    request.predicate = NSPredicate(format: "\(#keyPath(BowTie.searchKey)) == '\(selectedValue)'")
+
+    let results = try! managedContext.fetch(request)
+    currentBowTie = results.first
   }
 
   @IBAction func wear(_ sender: UIButton) {
-    // Add code here
+    currentBowTie.timesWorn += 1
+    currentBowTie.lastWorn = Date()
+
+    appDelegate.saveContext()
+    populate(bowTie: currentBowTie)
   }
 
   @IBAction func rate(_ sender: UIButton) {
-    // Add code here
+    let alert = UIAlertController(
+      title: "New Rating",
+      message: "Rate this bow tie",
+      preferredStyle: .alert)
+
+    alert.addTextField { textField in
+      textField.keyboardType = .decimalPad
+    }
+
+    let cancelAction = UIAlertAction(title: "Cancel", style: .cancel)
+
+    let saveAction = UIAlertAction(
+      title: "Save", style: .default) { [unowned self] _ in
+        if let textField = alert.textFields?.first {
+          self.update(rating: textField.text)
+        }
+      }
+
+    alert.addAction(cancelAction)
+    alert.addAction(saveAction)
+
+    present(alert, animated: true)
+  }
+
+  private func update(rating: String?) {
+    guard
+      let rating,
+      let rating = Double(rating)
+    else {
+      return
+    }
+
+    currentBowTie.rating = rating
+    populate(bowTie: currentBowTie)
+    appDelegate.saveContext()
+  }
+
+  private func insertSampleData() {
+    let fetch: NSFetchRequest<BowTie> = BowTie.fetchRequest()
+    fetch.predicate = NSPredicate(format: "searchKey != nil")
+
+    let tieCount = (try? managedContext.count(for: fetch)) ?? 0
+
+    guard tieCount == 0 else {
+      // Already done
+      return
+    }
+
+    let path = Bundle.main.path(forResource: "SampleData", ofType: "plist")
+    let dataArray = NSArray(contentsOfFile: path!)!
+
+    for dict in dataArray {
+      let bowTie = BowTie(context: managedContext)
+      let dict = dict as! [String: Any]
+
+      bowTie.id = UUID(uuidString: dict["id"] as! String)
+      bowTie.name = dict["name"] as? String
+      bowTie.searchKey = dict["searchKey"] as? String
+      bowTie.rating = dict["rating"] as! Double
+      let colorDict = dict["tintColor"] as! [String: Any]
+      bowTie.tintColor = UIColor.color(dict: colorDict)
+
+      let imageName = dict["imageName"] as! String
+      let image = UIImage(named: imageName)
+      bowTie.photoData = image?.pngData()
+      bowTie.lastWorn = dict["lastWorn"] as? Date
+
+      let timesWorn = dict["timesWorn"] as! NSNumber
+      bowTie.timesWorn = timesWorn.int32Value
+      bowTie.isFavorite = dict["isFavorite"] as! Bool
+      bowTie.url = URL(string: dict["url"] as! String)
+    }
+
+    try? managedContext.save()
+  }
+
+  private func populate(bowTie: BowTie) {
+    guard let imageData = bowTie.photoData as Data?,
+          let lastWorn = bowTie.lastWorn as Date?,
+          let tintColor = bowTie.tintColor else {
+      return
+    }
+
+    imageView.image = UIImage(data: imageData)
+    nameLabel.text = bowTie.name
+    ratingLabel.text = "Rating: \(bowTie.rating)/5"
+    timesWornLabel.text = "# times worn: \(bowTie.timesWorn)"
+
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateStyle = .short
+    dateFormatter.timeStyle = .none
+
+    lastWornLabel.text = "Last worn: \(dateFormatter.string(from: lastWorn))"
+
+    favoriteLabel.isHidden = !bowTie.isFavorite
+    view.tintColor = tintColor
+  }
+}
+
+private extension UIColor {
+  static func color(dict: [String: Any]) -> UIColor {
+    let red = dict["red"] as! NSNumber
+    let green = dict["green"] as! NSNumber
+    let blue = dict["blue"] as! NSNumber
+
+    return UIColor(
+      red: CGFloat(truncating: red) / 255.0,
+      green: CGFloat(truncating: green) / 255.0,
+      blue: CGFloat(truncating: blue) / 255.0,
+      alpha: 1)
   }
 }
