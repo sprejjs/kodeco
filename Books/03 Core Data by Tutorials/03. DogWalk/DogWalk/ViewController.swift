@@ -31,8 +31,9 @@
 /// THE SOFTWARE.
 
 import UIKit
+import CoreData
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
   // MARK: - Properties
   lazy var dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
@@ -40,8 +41,9 @@ class ViewController: UIViewController {
     formatter.timeStyle = .medium
     return formatter
   }()
+  lazy var coreDataStack = CoreDataStack(modelName: "DogWalk")
 
-  var walks: [Date] = []
+  var currentDog: Dog?
 
   // MARK: - IBOutlets
   @IBOutlet var tableView: UITableView!
@@ -52,13 +54,40 @@ class ViewController: UIViewController {
     super.viewDidLoad()
 
     tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
+    let dogName = "Fido"
+    let dogFetchRequest = Dog.fetchRequest()
+    dogFetchRequest.predicate = NSPredicate(format: "%K == %@", #keyPath(Dog.name), dogName)
+
+    do {
+      let results = try coreDataStack.managedContext.fetch(dogFetchRequest)
+      if results.isEmpty {
+        currentDog = Dog(context: coreDataStack.managedContext)
+        currentDog?.name = dogName
+        coreDataStack.saveContext()
+      } else {
+        currentDog = results.first
+      }
+    } catch {
+      print("Fetch error: \(error)")
+    }
   }
 }
 
 // MARK: - IBActions
 extension ViewController {
   @IBAction func add(_ sender: UIBarButtonItem) {
-    walks.append(Date())
+    let walk = Walk(context: coreDataStack.managedContext)
+    walk.date = Date()
+
+    guard
+      let dog = currentDog
+    else {
+      fatalError("Nowhere to add a walk to")
+    }
+    dog.addToWalks(walk)
+
+    coreDataStack.saveContext()
+
     tableView.reloadData()
   }
 }
@@ -66,14 +95,17 @@ extension ViewController {
 // MARK: UITableViewDataSource
 extension ViewController: UITableViewDataSource {
   func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-    walks.count
+    currentDog?.walks?.count ?? 0
   }
 
   func tableView(
     _ tableView: UITableView,
     cellForRowAt indexPath: IndexPath
   ) -> UITableViewCell {
-    let date = walks[indexPath.row]
+    guard let date = (currentDog?.walks?.object(at: indexPath.row) as? Walk)?.date else {
+      fatalError("No walk at index")
+    }
+
     let cell = tableView.dequeueReusableCell(
       withIdentifier: "Cell", for: indexPath)
     cell.textLabel?.text = dateFormatter.string(from: date)
@@ -82,5 +114,22 @@ extension ViewController: UITableViewDataSource {
 
   func tableView(_ tableView: UITableView, titleForHeaderInSection section: Int) -> String? {
     "List of Walks"
+  }
+
+  func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+    true
+  }
+
+  func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+    guard let walkToremove = currentDog?.walks?[indexPath.row] as? Walk,
+          editingStyle == .delete else {
+      return
+    }
+
+    coreDataStack.managedContext.delete(walkToremove)
+
+    coreDataStack.saveContext()
+
+    tableView.deleteRows(at: [indexPath], with: .automatic)
   }
 }
