@@ -80,6 +80,15 @@ struct SymbolListView: View {
         TickerView(selectedSymbols: Array(selected).sorted())
           .environmentObject(model)
       }
+      .task {
+        guard symbols.isEmpty else { return }
+
+        do {
+          symbols = try await model.availableSymbols()
+        } catch {
+          lastErrorMessage = error.localizedDescription
+        }
+      }
     }
   }
 }
