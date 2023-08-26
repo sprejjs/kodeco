@@ -47,6 +47,10 @@ class TaskManager: ObservableObject {
     DispatchQueue.global().async {
       self.taskPersistenceManager.save(tasks: self.tasks)
     }
+
+    if task.reminderEnabled {
+      NotificationManager.shared.scheduleNotification(task: task)
+    }
   }
 
   func loadTasks() {
@@ -68,6 +72,7 @@ class TaskManager: ObservableObject {
     DispatchQueue.global().async {
       self.taskPersistenceManager.save(tasks: self.tasks)
     }
+    NotificationManager.shared.removeNotifications(task: task)
   }
 
   func markTaskComplete(task: Task) {

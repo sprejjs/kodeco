@@ -47,7 +47,11 @@ struct TaskListView: View {
           Spacer()
           Button(
             action: {
-              // TODO: Add Notification authorization
+              NotificationManager.shared.requestAuthorization { granted in
+                if granted {
+                  showNotificationSettingsUI = true
+                }
+              }
             },
             label: {
               Image(systemName: "bell")

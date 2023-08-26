@@ -37,4 +37,63 @@ import CoreLocation
 class NotificationManager: ObservableObject {
   static let shared = NotificationManager()
   @Published var settings: UNNotificationSettings?
+
+  func requestAuthorization(completion: @escaping (Bool) -> Void) {
+    UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .sound, .badge]) { [weak self] granted, error in
+      self?.fetchNotificationSettings()
+      completion(granted)
+    }
+  }
+
+  func fetchNotificationSettings() {
+    UNUserNotificationCenter.current().getNotificationSettings() { settings in
+      DispatchQueue.main.async {
+        self.settings = settings
+      }
+    }
+  }
+
+  func removeNotifications(task: Task) {
+    UNUserNotificationCenter
+      .current()
+      .removePendingNotificationRequests(withIdentifiers: [task.id])
+  }
+
+  func scheduleNotification(task: Task) {
+    let content = UNMutableNotificationContent()
+    content.title = task.name
+    content.body = "Gentle reminder for your task!"
+
+    let trigger: UNNotificationTrigger?
+    switch task.reminder.reminderType {
+    case .time:
+      if let timeInterval = task.reminder.timeInterval {
+        trigger = UNTimeIntervalNotificationTrigger(
+          timeInterval: timeInterval,
+          repeats: task.reminder.repeats)
+      } else {
+        trigger = nil
+      }
+    default:
+      trigger = nil
+      return
+    }
+
+    guard let trigger else {
+      return
+    }
+
+    let request = UNNotificationRequest(
+      identifier: task.id,
+      content: content,
+      trigger: trigger)
+
+    UNUserNotificationCenter
+      .current()
+      .add(request) { error in
+        if let error {
+          print(error)
+        }
+      }
+  }
 }

@@ -31,6 +31,14 @@
 /// THE SOFTWARE.
 
 import UIKit
+import CoreData
+
+protocol FilterViewControllerDelegate: AnyObject {
+  func filterViewController(
+    filter: FilterViewController,
+    didSelectPredicate predicate: NSPredicate?,
+    sortDescriptor: NSSortDescriptor?)
+}
 
 class FilterViewController: UITableViewController {
   @IBOutlet weak var firstPriceCategoryLabel: UILabel!
@@ -54,22 +62,166 @@ class FilterViewController: UITableViewController {
   @IBOutlet weak var distanceSortCell: UITableViewCell!
   @IBOutlet weak var priceSortCell: UITableViewCell!
 
+  var coreDataStack: CoreDataStack!
+  weak var delegate: FilterViewControllerDelegate?
+  var selectedSortDescriptor: NSSortDescriptor?
+  var selectedPredicate: NSPredicate?
+
+  private lazy var cheapVenuePredicate: NSPredicate = {
+    NSPredicate(format: "%K == %@", #keyPath(Venue.priceInfo.priceCategory), "$")
+  }()
+
+  private lazy var moderateVenuePredicate: NSPredicate = {
+    NSPredicate(format: "%K == %@", #keyPath(Venue.priceInfo.priceCategory), "$$")
+  }()
+
+  private lazy var expensiveVenuePredicate: NSPredicate = {
+    NSPredicate(format: "%K == %@", #keyPath(Venue.priceInfo.priceCategory), "$$$")
+  }()
+
+  private lazy var offeringDealPredicate: NSPredicate = {
+    NSPredicate(
+      format: "%K > 0",
+      #keyPath(Venue.specialCount))
+  }()
+
+  private lazy var walkingDistancePredicate: NSPredicate = {
+    NSPredicate(
+      format: "%K < 500",
+      #keyPath(Venue.location.distance))
+  }()
+
+  private lazy var hasUserTipsPredicate: NSPredicate = {
+    NSPredicate(
+      format: "%K > 0",
+      #keyPath(Venue.stats.tipCount))
+  }()
+
   // MARK: - View Life Cycle
   override func viewDidLoad() {
     super.viewDidLoad()
+
+    populateCheapVenueCountLabel()
+    populateModerateVenueCountLabel()
+    populateExpensiveVenueCountLabel()
+    populateDealsCountLabel()
   }
 }
 
 // MARK: - IBActions
 extension FilterViewController {
   @IBAction func search(_ sender: UIBarButtonItem) {
-    // Add code here
+    delegate?.filterViewController(
+      filter: self,
+      didSelectPredicate: selectedPredicate,
+      sortDescriptor: selectedSortDescriptor)
+
+    dismiss(animated: true)
   }
 }
 
 // MARK: - UITableViewDelegate
 extension FilterViewController {
   override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-    // Add code here
+
+    guard let cell = tableView.cellForRow(at: indexPath) else {
+      return
+    }
+
+    switch cell {
+    case cheapVenueCell:
+      selectedPredicate = cheapVenuePredicate
+    case moderateVenueCell:
+      selectedPredicate = moderateVenuePredicate
+    case expensiveVenueCell:
+      selectedPredicate = expensiveVenuePredicate
+    case offeringDealCell:
+      selectedPredicate = offeringDealPredicate
+    case walkingDistanceCell:
+      selectedPredicate = walkingDistancePredicate
+    case userTipsCell:
+      selectedPredicate = hasUserTipsPredicate
+    default:
+      break
+    }
+
+    cell.accessoryType = .checkmark
+  }
+}
+
+extension FilterViewController {
+  func populateCheapVenueCountLabel() {
+    let fetchRequest = NSFetchRequest<NSNumber>(entityName: "Venue")
+    fetchRequest.resultType = .countResultType
+    fetchRequest.predicate = cheapVenuePredicate
+
+    fetchRequest.fetchBatchSize = 10 // <- Fetch information in batches of 10 objects.
+    fetchRequest.fetchLimit = 5 // <- Limit the result to 5 objects.
+    fetchRequest.fetchOffset = 5 // <- Skip the first 5 objects.
+
+    do {
+      let countResult = try coreDataStack.managedContext.fetch(fetchRequest)
+
+      let count = countResult.first?.intValue ?? 0
+      let pluralized = count == 1 ? "place" : "places"
+      firstPriceCategoryLabel.text = "\(count) bubble tea \(pluralized)"
+    } catch let error as NSError {
+      print("Count not fetched \(error), \(error.userInfo)")
+    }
+  }
+
+  func populateModerateVenueCountLabel() {
+    let fetchRequest = NSFetchRequest<NSNumber>(entityName: "Venue")
+    fetchRequest.resultType = .countResultType
+    fetchRequest.predicate = moderateVenuePredicate
+
+    do {
+      let countResult = try coreDataStack.managedContext.fetch(fetchRequest)
+
+      let count = countResult.first?.intValue ?? 0
+      let pluralized = count == 1 ? "place" : "places"
+      secondPriceCategoryLabel.text = "\(count) bubble tea \(pluralized)"
+    } catch let error as NSError {
+      print("Count not fetched \(error), \(error.userInfo)")
+    }
+  }
+
+  func populateExpensiveVenueCountLabel() {
+    let fetchRequest = NSFetchRequest<NSNumber>(entityName: "Venue")
+    fetchRequest.predicate = expensiveVenuePredicate
+
+    do {
+      let count = try coreDataStack.managedContext.count(for: fetchRequest)
+      let pluralized = count == 1 ? "place" : "places"
+      thirdPriceCategoryLabel.text = "\(count) bubble tea \(pluralized)"
+    } catch let error as NSError {
+      print("Count not fetched \(error), \(error.userInfo)")
+    }
+  }
+
+  func populateDealsCountLabel() {
+    let fetchRequest = NSFetchRequest<NSDictionary>(entityName: "Venue")
+    fetchRequest.resultType = .dictionaryResultType
+
+    let sumExpressionDesc = NSExpressionDescription()
+    sumExpressionDesc.name = "sumDeals"
+
+    let specialCountExp = NSExpression(forKeyPath: #keyPath(Venue.specialCount))
+    sumExpressionDesc.expression = NSExpression(forFunction: "sum:", arguments: [specialCountExp])
+    sumExpressionDesc.expressionResultType = .integer32AttributeType
+
+    fetchRequest.propertiesToFetch = [sumExpressionDesc]
+
+    do {
+      let results = try coreDataStack.managedContext.fetch(fetchRequest)
+
+      let resultDict = results.first
+      let numDeals = resultDict?["sumDeals"] as? Int ?? 0
+      let pluralized = numDeals == 1 ? "deal" : "deals"
+      numDealsLabel.text = "\(numDeals) \(pluralized)"
+
+    } catch let error as NSError {
+      print("count not fetched \(error), \(error.userInfo)")
+    }
   }
 }

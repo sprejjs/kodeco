@@ -52,17 +52,20 @@ class ViewController: UIViewController {
 
     importJSONSeedDataIfNeeded()
 
-    guard let model = coreDataStack.managedContext.persistentStoreCoordinator?.managedObjectModel,
-          let fetchRequest = model.fetchRequestTemplate(forName: "FetchRequest") as? NSFetchRequest<Venue> else {
-      return
-    }
-    self.fetchRequest = fetchRequest
+    self.fetchRequest = Venue.fetchRequest()
     fetchAndReload()
   }
 
   // MARK: - Navigation
   override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
     if segue.identifier == filterViewControllerSegueIdentifier {
+      guard let destination = segue.destination as? UINavigationController,
+            let filterController = destination.topViewController as? FilterViewController else {
+        return
+      }
+
+      filterController.coreDataStack = self.coreDataStack
+      filterController.delegate = self
     }
   }
 }
@@ -173,5 +176,19 @@ extension ViewController {
     } catch let error as NSError {
       print("Could not fetch \(error), \(error.userInfo)")
     }
+  }
+}
+
+extension ViewController: FilterViewControllerDelegate {
+  func filterViewController(filter: FilterViewController, didSelectPredicate predicate: NSPredicate?, sortDescriptor: NSSortDescriptor?) {
+    fetchRequest?.predicate = predicate
+
+    if let sortDescriptor {
+      fetchRequest?.sortDescriptors = [sortDescriptor]
+    } else {
+      fetchRequest?.sortDescriptors = nil
+    }
+
+    fetchAndReload()
   }
 }
